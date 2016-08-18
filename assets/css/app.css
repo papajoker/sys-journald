@@ -1,0 +1,131 @@
+ #content pre { display: none; } /* pour debug */
+
+ .navbar { margin:0.5em 1.5em; padding-left:0.5em; }
+ .navbar-default { 
+     background-color: #4e5d6c; padding-top:0.7em; color:#eee;
+  }
+
+.navbar .form-group {
+    margin-bottom: 0.5em;
+}  
+
+.navbar button {
+    position:relative; top:-2em;
+}
+
+ 
+ .vertical-align {
+    display: flex;
+    align-items: center;
+}
+ 
+ .priority0 {
+     border-left-color: #ff0000;
+ }
+ 
+ .priority1 {
+     border-left-color: #ff3333;
+ }
+ 
+ .priority2 {
+     border-left-color: #ff6666;
+ }
+ 
+ .priority3 {
+     border-left-color: #ff9999;
+ }
+ 
+ .priority4 {
+     border-left-color: #ffff00;
+ }
+ 
+ .priority5 {
+     border-left-color: #ddff00;
+ }
+ 
+ .priority6 {
+     border-left-color: #eeff00;
+ }
+ 
+ .priority7 {
+     border-left-color: #eeffee;
+ }
+ 
+ #logs li {
+     border-top: 1px solid #ccc;
+     border-left-width: 10px;
+     border-left-style: solid;
+     margin-top: 1px;
+     /*color:#000;*/ 
+     padding:0.5em 1em;
+     position: relative;
+     clear: right;
+ }
+ #logs .msg {
+     display: block;
+     letter-spacing: .09em;
+     font-weight: 700; 
+ }
+ #logs span.priority { float: right; }
+ #logs span.exe { margin:0 1em;}
+  #logs span.uid { float: right; }
+ #logs .cache { 
+      display:none;
+ }
+
+ #logs span.time,
+ #dialog .modal-body i.fa,
+ #logs span.executable,
+ #logs span.unit { 
+     cursor: pointer; 
+ }
+ #dialog .modal-body i.fa {
+      margin-right: .5em;
+ }
+
+ #dialog .back { 
+     cursor: pointer; 
+     visibility: hidden;
+     padding:0 1em;
+     font-size:80%;
+     float:left; margin-right:1em;
+ }
+
+ h5 { 
+    letter-spacing: .09em; font-weight: 200; text-align: center;
+    padding: 0; margin: 0;
+    font-size: 80%;
+ }
+ h2 {
+     padding: 0; margin: 0;
+ }
+
+ div.information div {
+     text-align:center;
+ }
+
+ .about {
+     text-align: center;
+ }
+ .about img {
+     margin: 1em;
+ }
+ .about img[alt=papajoke] {
+    border-radius: 50%;
+    border-width: 3px;
+    border-style: solid;
+    border-color: #eee;
+ }
+
+ .df-size, .df-used, .df-avail, .df-pcent {
+     text-align: right;
+ }
+ div.df div:first-child {
+    border-bottom: 1px solid #eee;
+    margin-bottom:0.6em;
+    padding-bottom:0.6em;
+ }
+
+ .center {
+     text-align: center;
+ }

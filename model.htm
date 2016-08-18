@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="./assets/css/themes/flatly/bootstrap.css" rel="stylesheet" type="text/css" />
+	<link href="./assets/css/font-awesome.css" rel="stylesheet" type="text/css" />
+	<link href="./assets/css/app.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+	<div class="">
+
+		<div class="navbar navbar-default Xcol-xs-10 Xcol-xs-offset-1" id="nav">
+			<form>
+				<div class="form-group row vertical-align">
+					<label for="search" class="col-xs-3 control-label vbottom">::html.program::</label>
+					<div class="col-xs-4">
+						<input id="search" name="search" type="search" value="" class="form-control input-sm" placeholder="" autofocus/>
+					</div>
+					<div class="col-xs-4">
+						<select id="searchtype" class="form-control input-sm">
+						<option value="0">::html.type.unit::</option>
+						<option value="1" selected>::html.type.program::</option>
+					</select>
+					</div>
+				</div>
+				<div class="form-group row vertical-align">
+					<label for="boot" class="col-xs-3 control-label">::html.boot.caption::</label>
+					<div class="col-xs-4">
+						<input id="boot" name="boot" type="number" value="0" class="form-control input-sm" />
+					</div>
+					<span class="col-xs-4 vertical-align">::html.boot.notice::</span>
+				</div>
+
+				<div class="form-group row vertical-align">
+					<label for="date" class="col-xs-3 control-label">::html.date::</label>
+					<div class="col-xs-4">
+						<input id="date" name="date" type="date" class="form-control input-sm" />
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label for="level" class="col-xs-3 control-label">::html.level::</label>
+					<div class="col-xs-4">
+						<select id="level" name="level" class="form-control input-sm">
+							<option value=""></option>
+							<option value="0">(0) ::html.levels[0]::</option>
+							<option value="1">(1) ::html.levels[1]::</option>
+							<option value="2">(2) ::html.levels[2]::</option>
+							<option value="3" selected>(3) ::html.levels[3]::</option>
+							<option value="4">(4) ::html.levels[4]::</option>
+							<option value="5">(5) ::html.levels[5]::</option>
+							<option value="6">(6) ::html.levels[6]::</option>
+							<option value="7">(7) ::html.levels[7]::</option>
+						</select>
+					</div>
+					<div class="col-xs-4 ">
+						<button id="send-btn" type="submit" class="btn btn-primary center-block"><span class="fa fa-list-ol"></span> &nbsp; <span>::html.find::</span></button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+	</div>
+
+
+	<div id="container">
+		<h5 id="commandbash"></h5>
+		<div id="content">
+			<ol id="logs">
+				<h3>Systemd Logs</h3>
+				<span>::html.welcome:: !</span>
+				<!------------------------
+					... 
+					-------------------------
+				-->
+				<br /><br /><br /><br />
+				<div class="center">
+					<div class="release"></div>
+					<div class="uname"></div>
+					<div class="nodeinfos"></div>
+				</div>
+			</ol>
+		</div>
+	</div>
+
+	<!--
+	<a href="pacman://sudo/qi" target="pacman">pacman://sudo/qi</a><br>
+	<a href="pacman://sudo/ql" target="pacman">pacman://sudo/ql</a>
+	-->
+
+</body>
+
+<script>
+	window.$ = window.jQuery = require('./assets/js/jquery-3.1.0.min.js');
+	require('./assets/js/bootstrap.min.js');
+	require('./assets/renderer.js');
+</script>
+<script src="assets/js/dragscroll.js"></script>
+
+</html>

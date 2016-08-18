@@ -1,0 +1,8 @@
+node_modules
+e-journald-linux-x64
+dist
+stdout.json
+compiler.sh
+.directory
+.vscode
+test.js
