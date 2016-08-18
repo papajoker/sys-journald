@@ -436,6 +436,13 @@ function setInfos() {
 window.addEventListener('load', (e) => {
     dialog.init()
     setInfos()
+    ipcRenderer.send(consts.events.JOURNAL_GET_BOOTS)
+})
+
+ipcRenderer.on(consts.events.JOURNAL_GET_BOOTS_REPLY, (event, response) => {
+    response.items.forEach((item) => {
+        $('#boot').append(`<option value="${item.id}">${item.date} &nbsp;&nbsp; ${item.time.slice(0,-3)} &nbsp;&nbsp; ${item.day}</option>`)
+    })
 })
 
 ipcRenderer.on(consts.events.UNAME_REPLY, (event, response) => {

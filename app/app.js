@@ -3,6 +3,7 @@ const consts = require('./consts.js')
 const ipcMain = require('electron').ipcMain
 const fs = require('fs')
 const exec = require('child_process').exec
+const execSync = require('child_process').execSync
 const dico = consts.loadDico()
 
 const plus= ( process.argv.indexOf('--plus')>0 || process.env['PLUS']=='true' )
@@ -64,6 +65,31 @@ ipcMain.on(consts.events.JOURNALCTL, (event, query) => {
     })
 })
 
+ipcMain.on(consts.events.JOURNAL_GET_BOOTS, (event) => {
+    let items, response = {}
+    let line=''
+    response.items = []
+    exec(`journalctl --list-boots --no-pager | `+
+        `tail -n -40 | sort -gr | `+
+        `awk '{print $1","$3","$4","$5}'`, {
+        encoding: 'utf8'},
+    (err, stdout, stderr) => {
+        if (!err) {
+            let lines= stdout.split("\n")
+            lines.forEach((line) => {
+                items=line.split(',')
+                if (items.length==4) response.items.push( {
+                    id: items[0],
+                    day: items[1],
+                    date: items[2].slice(5),
+                    time: items[3]
+                })
+            })
+            event.sender.send(consts.events.JOURNAL_GET_BOOTS_REPLY, response)
+        }
+    })
+})
+
 ipcMain.on(consts.events.CAT_UNIT, (event, unit) => {
     let response = {}
     exec(`systemctl cat ${unit}`, {
@@ -103,7 +129,7 @@ ipcMain.on(consts.events.PLOT, (event) => {
 
 ipcMain.on(consts.events.LIST_RUN_UNITS, (event) => {
     let response = {}
-    response.displayManager = require('child_process').execSync("systemctl show display-manager.service | awk -F=  '/^Id/ {print $2}'", {
+    response.displayManager = execSync("systemctl show display-manager.service | awk -F=  '/^Id/ {print $2}'", {
         encoding: 'utf8'
     })
     let bash = `systemctl list-units --state running -t service --no-pager |` +
