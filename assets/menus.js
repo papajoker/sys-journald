@@ -9,6 +9,7 @@ const {
     MenuItem
 } = remote
 const fs = require('fs')
+const path = require('path');
 const EventEmitter = require('events').EventEmitter;
 
 const consts = require('../app/consts.js')
@@ -30,9 +31,9 @@ class AppMenu extends EventEmitter {
     setThemes () {
         let self = this
         let themeMenu = new Menu();
-        fs.readdir(__dirname+'/css/themes/', function (err, files) {
+        fs.readdir(path.join(__dirname,'/css/themes'), function (err, files) {
             files.forEach(function (file) {
-                fs.stat(__dirname+'/css/themes/'+file, function (err, stats) {
+                fs.stat(path.join(__dirname,'/css/themes/',file), function (err, stats) {
                     if (err) throw err;
                     if (stats.isDirectory()) {
                         themeMenu.append(new MenuItem({ 
@@ -41,7 +42,6 @@ class AppMenu extends EventEmitter {
                             id: `mnu_${file}`,
                             click: () => {
                                 self.emit('action', 'SET_THEME', file);
-                                //ipcRenderer.send('THEME_CHANGE',file)
                             }
                         }));
                     }
@@ -182,9 +182,7 @@ class AppMenu extends EventEmitter {
 
         function changeTheme(menu,mnuid) {
             menu.items.forEach((item) => {
-                console.log(item.label)
                 if (item.label=='Themes'){
-                    console.log('themes',item.submenu)
                     changeTheme(item.submenu,mnuid);
                     return
                 }
@@ -193,7 +191,6 @@ class AppMenu extends EventEmitter {
                 }
                 else if (item.id == mnuid) {
                     item.checked = true
-                    console.log('update menu',options.theme)
                     return true
                 } 
             });

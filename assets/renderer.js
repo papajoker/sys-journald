@@ -157,7 +157,6 @@ ipcRenderer.on(consts.events.PLOT_REPLY, (event, src) => {
  *   input: response.units object
  */
 ipcRenderer.on(consts.events.LIST_RUN_UNITS_REPLY, (event, response) => {
-    console.log(response)
     let html = ''
     for (let key in response.units) {
         html += `<i class="fa fa-info-circle catunit" aria-hidden="true" data-unit="${key}"></i>

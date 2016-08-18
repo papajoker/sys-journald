@@ -1,6 +1,6 @@
 {
   "name": "sys-journald",
-  "version": "0.1.0-1",
+  "version": "0.1.1-1",
   "description": "view journald logs with electron app",
   "homepage": "https://github.com/papajoker/sys-journald",
   "main": "app/main.js",
