@@ -239,9 +239,9 @@ function showDialogPacmanInfo(event, response) {
                 <div class="row" class="">
                     <div class="col-lg-8">
                         <div class="input-group" id="man-search-form">
-                        <input type="text" class="form-control" placeholder="Search in man" value="${response.unit}">
+                        <input type="text" class="form-control input-sm" placeholder="Search in man" value="${response.unit}">
                         <span class="input-group-btn">
-                            <button class="btn btn-primary" type="submit"><span class="fa fa-search"></span></button>
+                            <button class="btn btn-primary btn-sm" type="submit"><span class="fa fa-search"></span></button>
                         </span>
                         </div>
                     </div>
@@ -260,6 +260,35 @@ function showDialogPacmanInfo(event, response) {
         }, false)
     })
 }
+
+/*
+ *   Dialog: list program and units in journald
+ *   input: response.unit string
+ *          response.exe string
+ *          response.comm string
+ */
+ipcRenderer.on(consts.events.JOURNAL_GET_EXES_REPLY, (event, response) => {
+    dialog.title='search input'
+    dialog.body = `
+        <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#units" aria-controls="units" role="tab" data-toggle="tab">${dico.html.type.unit}</a></li>
+        <li role="presentation"><a href="#exe" aria-controls="exe" role="tab" data-toggle="tab">${dico.html.type.program}</a></li>
+        <!--li role="presentation"><a href="#comm" aria-controls="comm" role="tab" data-toggle="tab">Comm</a></li-->
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="units">
+            ${response.unit.replace(/(.*)\.service$/gm, '$1').replace(/\n/g, '<br />')}
+            </div>
+            <div role="tabpanel" class="tab-pane" id="exe">
+            ${response.exe.replace(/\n/g, '<br />')}
+            </div>
+            <!--div role="tabpanel" class="tab-pane" id="comm">
+                ${response.comm.replace(/\n/g, '<br />')}
+            </div-->
+        </div>
+        `
+    dialog.show()
+})
 
 ipcRenderer.on(consts.events.PACMAN_QO_REPLY, (event, response) => {
     showDialogPacmanInfo(event, response)
@@ -327,9 +356,9 @@ function showDialogMan(response) {
                 <div class="row" class="">
                     <div class="col-lg-8">
                         <div class="input-group" id="man-search-form">
-                        <input type="text" class="form-control" value="${response.caption}" placeholder="Search in man" autofocus>
+                        <input type="text" class="form-control input-sm" value="${response.caption}" placeholder="Search in man" autofocus>
                         <span class="input-group-btn">
-                            <button class="btn btn-primary" type="submit"><span class="fa fa-search"></span></button>
+                            <button class="btn btn-primary btn-sm" type="submit"><span class="fa fa-search"></span></button>
                         </span>
                         </div>
                     </div>
@@ -437,6 +466,17 @@ window.addEventListener('load', (e) => {
     dialog.init()
     setInfos()
     ipcRenderer.send(consts.events.JOURNAL_GET_BOOTS)
+
+    document.getElementById('search-exe').addEventListener('click', (event) => {
+        event.preventDefault();
+        ipcRenderer.send(consts.events.JOURNAL_GET_EXES)
+    }, false)
+
+    document.getElementById('search').addEventListener('blur', (event) => {
+        if (document.getElementById('search').value.slice(0,1)=='/') {
+            document.getElementById('searchtype').selectedIndex = 1
+        }
+    }, false)
 })
 
 ipcRenderer.on(consts.events.JOURNAL_GET_BOOTS_REPLY, (event, response) => {

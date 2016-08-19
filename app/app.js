@@ -25,6 +25,7 @@ ipcMain.on(consts.events.JOURNALCTL, (event, query) => {
             searchtype = ''
             console.log('program find with path')
         }
+        query.search=`"${query.search}"`
     } else {
         searchtype = ''
     }
@@ -62,6 +63,32 @@ ipcMain.on(consts.events.JOURNALCTL, (event, query) => {
             'error': stderr,
             'bash': command.slice(0, -25)
         })
+    })
+})
+
+ipcMain.on(consts.events.JOURNAL_GET_EXES, (event) => {
+    let response ={}
+    exec(`journalctl -F _EXE | awk -F'/' '{print $NF}' | sort`, {
+        encoding: 'utf8'},
+    (err, stdout, stderr) => {
+        if (!err) {
+            response.exe= stdout
+                exec(`journalctl -F UNIT --no-pager | grep -Ev "\\x2" | sort`, {
+                    encoding: 'utf8'},
+                (err, stdout, stderr) => {
+                    if (!err) {
+                        response.unit= stdout
+                        exec(`journalctl -F _COMM --no-pager | grep -v "("  | sort`, {
+                            encoding: 'utf8'},
+                        (err, stdout, stderr) => {
+                            if (!err) {
+                                response.comm= stdout
+                                event.sender.send(consts.events.JOURNAL_GET_EXES_REPLY, response)
+                            }
+                        })
+                    }
+                })
+        }
     })
 })
 
@@ -134,7 +161,6 @@ ipcMain.on(consts.events.LIST_RUN_UNITS, (event) => {
     })
     let bash = `systemctl list-units --state running -t service --no-pager --no-legend |` +
         `awk '{printf $1":";for(i=5;i<=NF;++i)printf $i" ";print ","}'`
-
     console.log(bash)
     exec(bash, (err, stdout, stderr) => {
         if (!err) {

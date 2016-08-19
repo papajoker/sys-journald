@@ -14,6 +14,7 @@ module.exports = {
         MAN_SEARCH : 'man_search',
         BASH_DF : 'df',
         JOURNAL_GET_BOOTS : 'get boots',
+        JOURNAL_GET_EXES: 'get_list_executables',
         // responses
         LIST_RUN_UNITS_REPLY: 'list_units_response',
         PLOT_REPLY: 'plot_boot_response',
@@ -26,7 +27,8 @@ module.exports = {
         CAT_MAN_REPLY : 'show_man_response',
         MAN_SEARCH_REPLY : 'man_search_response',
         BASH_DF_REPLY : 'df_response',
-        JOURNAL_GET_BOOTS_REPLY : 'get_boots_response'
+        JOURNAL_GET_BOOTS_REPLY : 'get_boots_response',
+        JOURNAL_GET_EXES_REPLY: 'get_list_executables_response'
     },
     name: process.env['npm_package_name'],
     tmp: '/tmp/e-journald/',
