@@ -132,8 +132,7 @@ ipcMain.on(consts.events.LIST_RUN_UNITS, (event) => {
     response.displayManager = execSync("systemctl show display-manager.service | awk -F=  '/^Id/ {print $2}'", {
         encoding: 'utf8'
     })
-    let bash = `systemctl list-units --state running -t service --no-pager |` +
-        `head -n-7 |tail -n +2 | ` +
+    let bash = `systemctl list-units --state running -t service --no-pager --no-legend |` +
         `awk '{printf $1":";for(i=5;i<=NF;++i)printf $i" ";print ","}'`
 
     console.log(bash)
