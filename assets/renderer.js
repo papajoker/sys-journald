@@ -145,7 +145,7 @@ ipcRenderer.on(consts.events.PLOT_REPLY, (event, src) => {
     $('#dialog .modal-title').html('systemd-analyze plot')
     document.querySelector('#dialog .modal-body').innerHTML = `
         <div id="scroll" class="dragscroll" style="width:100%; height:${$(window).height()-150}px; overflow:scroll;">
-        <img src="${src}" style="width:2600px;">
+        <img src="${src}" style="width:2000px;">
         </div>
     `
     dragscroll.reset()
@@ -201,9 +201,8 @@ function showDialogPacmanInfo(event, response) {
     )
     response.qi = response.qi.replace(/\n/g, '<br />')
 
-//TODO: web href
-
     response.ql = response.ql.replace(/^(\/usr\/bin\/\w.*)/gm, '<span class="text-info">$1</span>')
+    response.ql = response.ql.replace(/^(\/usr\/share\/doc.*index\.html$)/gm, '<span class="text-info"><a href="$1" target="web" class="fa fa-external-link">$1</a></span>')
     response.ql = response.ql.replace(/^(\/etc\/\w.*)/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/(\.desktop)$/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/\n/g, '<br />')
@@ -477,8 +476,10 @@ window.addEventListener('load', (e) => {
 })
 
 ipcRenderer.on(consts.events.JOURNAL_GET_BOOTS_REPLY, (event, response) => {
+    let selected='selected'
     response.items.forEach((item) => {
-        $('#boot').append(`<option value="${item.id}">${item.date} &nbsp;&nbsp; ${item.time.slice(0,-3)} &nbsp;&nbsp; ${item.day}</option>`)
+        $('#boot').append(`<option ${selected} value="${item.id}">${item.date} &nbsp;&nbsp; ${item.time.slice(0,-3)} &nbsp;&nbsp; ${item.day}</option>`)
+        selected=''
     })
 })
 
@@ -550,6 +551,12 @@ $('option, span, label').text(function(i, value) {
 
 
 $(document).on('click', 'a[href^="http"]', function(event) {
+    event.preventDefault();
+    shell.openExternal(this.href);
+});
+
+$(document).on('click', 'a[target^="web"]', function(event) {
+    // for html in /usr/share/doc
     event.preventDefault();
     shell.openExternal(this.href);
 });

@@ -34,7 +34,7 @@ protocol.registerStandardSchemes(['pacman'])
 function createWindow() {
 
     const userconfig = new UserConfig()
-    userconfig.load() 
+    userconfig.load()
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
@@ -42,6 +42,7 @@ function createWindow() {
         height: userconfig.getItem('h'),
         minWidth: 450,
         minHeight: 470,
+        show: false,
         icon: __dirname + '/../assets/img/icon.png',
         title: consts.name,
         webPreferences: {
@@ -96,8 +97,9 @@ function createWindow() {
 
     mainWindow.webContents.on('dom-ready', () => {
         mainWindow.webContents.send('SET_THEME',mainWindow.userconfig.getItem('theme'));
+        mainWindow.show()
     })
-    
+
     if (!fs.existsSync(consts.tmp)) {
         fs.mkdir(consts.tmp)
     }
@@ -120,7 +122,7 @@ function createWindow() {
         if (error) console.error('Failed to register protocol')
     })
 
-    
+
 }
 
 // This method will be called when Electron has finished
