@@ -169,9 +169,6 @@ ipcRenderer.on(consts.events.LIST_RUN_UNITS_REPLY, (event, response) => {
     dialog.title = dico.logs.active_units
     dialog.body = html
     dialog.show()
-
-
-    $('#dialog').modal('show')
 })
 
 /*
@@ -199,12 +196,12 @@ function showDialogPacmanInfo(event, response) {
         response.qi = response.qi.replace(new RegExp(` (${value})[ |\n]`, 'g'), setLink)
     })
     response.qi = response.qi.replace(
-        new RegExp('(https?://[-a-z0-9:%_\+.~#;?&//=]{4,})', 'gmi'), 
+        new RegExp('(https?://[-a-z0-9:%_\+.~#;?&//=]{4,})', 'gmi'),
         `<a href="$1" title="$1" class="fa fa-external-link">&nbsp;$1</a>`
-    )    
+    )
     response.qi = response.qi.replace(/\n/g, '<br />')
 
-//TODO: web href    
+//TODO: web href
 
     response.ql = response.ql.replace(/^(\/usr\/bin\/\w.*)/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/^(\/etc\/\w.*)/gm, '<span class="text-info">$1</span>')
@@ -247,7 +244,7 @@ function showDialogPacmanInfo(event, response) {
                     </div>
                 </div>
                 </form>
-            </div>            
+            </div>
         </div>
         `
 
@@ -520,7 +517,7 @@ ipcRenderer.on('SET_THEME', (event, theme) => {
  */
 mainMenu.on('action', (event, param) => {
     switch(event) {
-        case 'SET_THEME' : 
+        case 'SET_THEME' :
             return applyTheme(param)
             //mainMenu.update({ 'theme' : param })
         case 'MAN' :
@@ -535,7 +532,7 @@ mainMenu.on('action', (event, param) => {
 
 
 /*
- * traductions  
+ * traductions
  * replace block in main.js#createWindow() break
  */
 $('option, span, label').text(function(i, value) {
