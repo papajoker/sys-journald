@@ -32,7 +32,7 @@ module.exports = class UserConfig {
             let data = fs.readFileSync(this.path, 'utf8')
             this.data = JSON.parse(data)
             if (!this.data.maxlogs) this.data.maxlogs = consts.packageInfos.maxitems
-            if (!this.data.notify) this.data.maxlogs = consts.packageInfos.notify
+            if (!this.data.notify) this.data.notify = consts.packageInfos.notify
             consts.packageInfos.maxitems = this.data.maxlogs
             consts.packageInfos.notify = this.data.notify
             console.log('user loaded', data)

@@ -52,10 +52,11 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
         items = JSON.parse(response.txt)
         console.log(items.length, ' JSON.parse Items .length')
         response = null
-        if (items.length > 25) {
+        console.log('mac notify', consts.packageInfos.notify)
+        if (items.length > consts.packageInfos.notify) {
             new Notification(`${dico.app.message}`, {
                 'body': `${items.length} ${dico.app.message}.`,
-                'icon': __dirname + '../../assets/img/icon.png'
+                'icon': __dirname + '../../../assets/img/icon.png'
             })
         }
     } catch (e) {

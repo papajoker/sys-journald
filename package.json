@@ -22,7 +22,7 @@
     "logs"
   ],
   "maxitems": 1400,
-  "notify": 10,
+  "notify": 50,
   "author": {
     "name": "papajoker",
     "email": "papajoke@archlinux.info"
