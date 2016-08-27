@@ -131,7 +131,7 @@
                     console.log('error', err)
                     fs.writeFile('/tmp/sjd-sudo', editor.getValue(), (err) => {
                         if (!err) {
-                            sudo.exec(`cp /tmp/sjd-sudo "${filename}"`, {
+                            sudo.exec(`cp /tmp/sjd-sudo "${filename}" && rm /tmp/sjd-sudo`, {
                                     name: 'sys journald'
                                 },
                                 function(error, stdout, stderr) {
