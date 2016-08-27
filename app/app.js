@@ -118,28 +118,8 @@ ipcMain.on(consts.events.JOURNAL_GET_BOOTS, (event) => {
     )
 })
 
-ipcMain.on(consts.events.CAT_UNIT, (event, unit) => {
-    let response = {}
-    exec(`systemctl cat ${unit}`, {
-        env: {
-            TERM: 'xterm' // no colors
-        }
-    },
-    (err, stdout, stderr) => {
-        if (!err) {
-            response.txt = stdout
-            exec(`systemctl show ${unit} --no-pager`, (err, stdout, stderr) => {
-                if (!err) {
-                    response.detail = stdout
-                    event.sender.send(consts.events.CAT_UNIT_REPLY, response)
-                } else {
-                    console.log('bash ERROR', stderr)
-                }
-            })
-        } else {
-            console.log('bash ERROR', stderr)
-        }
-    })
+ipcMain.on(require('../app/actions/unit').MSG, (event, unit) => {
+    require('../app/actions/unit').run(event, unit)
 })
 
 ipcMain.on(require('../app/actions/plotboot').MSG, (event) => {
@@ -270,27 +250,8 @@ function runPacman (event, request, callback) {
 module.exports.runPacman = runPacman
 
 
-
-ipcMain.on(consts.events.CAT_MAN, (event, item) => {
-    exec(`man -H ${item} | sed -n '/body/,/body/p'  `, {
-            // exec(`man ${item} | groff -man -E -T html | sed -n '/body/,/body/p'  `, {
-        env: {
-            TERM: 'xterm-256',
-            MANWIDTH: 1024,
-            BROWSER: 'cat'
-        }
-    },
-        (err, stdout, stderr) => {
-            if (!err) {
-                let response = {}
-                response.caption = item
-                response.txt = stdout
-                if (stderr) response.txt += stderr
-                event.sender.send(consts.events.CAT_MAN_REPLY, response)
-            } else {
-                console.log('bash ERROR', stderr, stdout)
-            }
-        })
+ipcMain.on(require('../app/actions/man').MSG, (event, key) => {
+    require('../app/actions/man').run(event, key)
 })
 
 ipcMain.on(consts.events.MAN_SEARCH, (event, item) => {
@@ -303,28 +264,8 @@ ipcMain.on(consts.events.MAN_SEARCH, (event, item) => {
     })
 })
 
-ipcMain.on(consts.events.BASH_DF, (event) => {
-    exec(`df -lh --output="source,fstype,size,used,avail,pcent,target" -x tmpfs -x devtmpfs| tail -n +2`, (err, stdout) => {
-        let response = { caption: '', items: [] }
-        let items = []
-        let lines = stdout.split("\n")
-        lines.forEach((line) => {
-            items = line.match(/\S+/g)
-            if (items) response.items.push({
-                source: items[0],
-                fstype: items[1],
-                size: items[2],
-                used: items[3],
-                avail: items[4],
-                pcent: items[5],
-                target: items[6]
-            })
-        })
-        exec(`lsblk --output="NAME,SIZE,MOUNTPOINT" -lJ`, (err, stdout) => {
-            response.lsblk = JSON.parse(stdout)
-            event.sender.send(consts.events.BASH_DF_REPLY, response)
-        })
-    })
+ipcMain.on(require('../app/actions/diskinfos').MSG, (event) => {
+    require('../app/actions/diskinfos').run(event)
 })
 
 ipcMain.on(consts.events.UNAME, (event) => {

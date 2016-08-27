@@ -52,7 +52,7 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
         items = JSON.parse(response.txt)
         console.log(items.length, ' JSON.parse Items .length')
         response = null
-        if (items.length > 5) {
+        if (items.length > 25) {
             new Notification(`${dico.app.message}`, {
                 'body': `${items.length} ${dico.app.message}.`,
                 'icon': __dirname + '../../assets/img/icon.png'
@@ -109,27 +109,10 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
  *           systemctl cat unit
  *           systemctl show unit
  */
-ipcRenderer.on(consts.events.CAT_UNIT_REPLY, (event, response) => {
-
-    response.txt = response.txt.replace(/^#(.*)\n/gm, '<i class="text-muted">#$1</i>' + '\n')
-    response.txt = response.txt.replace(/^\[(.*)\]$/gm, '[<em class="text-primary">$1</em>]')
-    response.txt = response.txt.replace(/^(\w.*?)=/gm, '<span class="text-info">$1</span>=')
-    response.txt = response.txt.replace(/\n/gm, '<br />')
-
-    response.detail = response.detail.replace(/^(\w.*?)=/gm, '<span class="text-info">$1</span>=')
-    response.detail = response.detail.replace(/\n/gm, '<br />')
-
-
-    dialog.title = dico.html.unit
-    dialog.body = `${response.txt}<hr /><h4>${dico.app.details}</h4><hr />${response.detail}`
-    dialog.show()
-
-        /* dialog.showMessageBox({
-                    "type": "info",
-                    "buttons": ["ok"],
-                    "title": "systemd logs",
-                    "message": "systemctl cat: "+response
-        }); */
+ipcRenderer.on(require('../actions/unit').MSG, (event, response) => {
+    let unit = require('../actions/unit')
+    unit.toHtml(response)
+    unit.showDialogModal(dialog)
 })
 
 ipcRenderer.on(require('../actions/plotboot').MSG, (event, src) => {
@@ -272,45 +255,10 @@ ipcRenderer.on(consts.events.PACMAN_QI_REPLY, (event, response) => {
  *   show html man page in dialog box
  *   make links to man and web
  */
-ipcRenderer.on(consts.events.CAT_MAN_REPLY, (event, response) => {
-    response.txt = response.txt.replace(/^#(.*)[<br>|<\/p>]/gm, '<i class="text-muted">#$1</i>' + '<br>')
-
-    function setLink (link) {
-        // links to man
-        let linkc = link.trim()
-        link = linkc
-        let plus = ''
-        let pos = link.indexOf('(')
-        if (pos > -1) {
-            link = link.slice(0, pos)
-            plus = linkc.slice(pos)
-        }
-        if (link == '') return linkc
-        return `<a href="#" class="man fa fa-info-circle"> ${link}</a>${plus} `
-    }
-
-    function setLinkhtml (link) {
-        // links to http
-        let linkc = link.trim()
-        link = linkc
-        let plus = ''
-        if (link.slice(-4) == '&gt;') {
-            link = link.slice(0, -4)
-            plus = '&gt'
-        }
-        if (link == '') return linkc
-        return `<a href="${link}" title="${link}" class="fa fa-external-link">&nbsp;${link}</a>${plus}`
-    }
-
-    response.txt = response.txt.replace(/(<b>[a-z0-9\-\._]*<\/b>\([\d]\))/gm, setLink)
-    response.txt = response.txt.replace(/(<i>[a-z0-9\-\._]*<\/i>\([\d]\))/gm, setLink)
-    response.txt = response.txt.replace(/(<tt>[a-z0-9\-\._]*<\/tt>\([\d]\))/gm, setLink)
-    response.txt = response.txt.replace(/([a-z0-9\-\._]*\([\d]\))/gm, setLink)
-    response.txt = response.txt.replace(new RegExp('(https?://[-a-z0-9:%_\+.~#;?&//=]{4,})', 'gmi'), setLinkhtml)
-
-    dialog.title = response.caption
-    dialog.body = response.txt
-    dialog.show()
+ipcRenderer.on(require('../actions/man').MSG, (event, response) => {
+    let man = require('../actions/man')
+    man.toHtml(response)
+    man.showDialogModal(dialog)
 })
 
 /*
@@ -353,41 +301,10 @@ ipcRenderer.on(consts.events.MAN_SEARCH_REPLY, (event, response) => {
  *   show partitions
  *   input: response : array of object
  */
-ipcRenderer.on(consts.events.BASH_DF_REPLY, (event, response) => {
-    dialog.title = 'df -h / lsblk'
-    let html = `<div class="row">
-                <span class="col-xs-3 df-source"></span>
-                <span class="col-xs-1 df-fstype">fs&nbsp;type</span>
-                <span class="col-xs-1 df-size">size</span>
-                <span class="col-xs-1 df-used">used</span>
-                <span class="col-xs-1 df-avail">avail</span>
-                <span class="col-xs-1 df-pcent">%</span>
-                <span class="col-xs-3 df-target">target</span>
-            </div>`
-    response.items.forEach((line) => {
-        html += `<div class="row">
-                <span class="col-xs-3 df-source">${line.source}</span>
-                <span class="col-xs-1 df-fstype">${line.fstype}</span>
-                <span class="col-xs-1 df-size">${line.size}</span>
-                <span class="col-xs-1 df-used">${line.used}</span>
-                <span class="col-xs-1 df-avail">${line.avail}</span>
-                <span class="col-xs-1 df-pcent">${line.pcent}</span>
-                <span class="col-xs-3 df-target">${line.target}</span>
-            </div>`
-    })
-
-    let html2 = ''
-    response.lsblk.blockdevices.forEach((line) => {
-        html2 += `<div class="row">
-                <span class="col-xs-4 df-source">${line.name}</span>
-                <span class="col-xs-1 df-size">${line.size}</span>
-                <span class="col-xs-3 col-xs-offset-3 df-mountpoint">${(line.mountpoint) ? line.mountpoint : '&nbsp;'}</span>
-            </div>`
-    })
-    dialog.body = `<div class="df">${html}</div>
-        <HR>
-        <div class="df">${html2}</div>`
-    dialog.show()
+ipcRenderer.on(require('../actions/diskinfos').MSG, (event, response) => {
+    let df = require('../actions/diskinfos')
+    df.toHtml(response)
+    df.showDialogModal(dialog)
 })
 
 function showAbout () {
