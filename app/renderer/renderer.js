@@ -2,40 +2,31 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-'use strict'
-
 const {
-    remote,
     ipcRenderer,
     shell,
-    protocol
 } = require('electron')
-const {
-    Menu,
-    MenuItem
-} = remote
 
-const consts = require('../app/consts.js')
+
+const consts = require('../consts.js')
 const MessageItem = require('./messageitem.js')
-const plus = (process.argv.indexOf('--plus') > 0 || process.env['PLUS'] == 'true')
+// const plus = (process.argv.indexOf('--plus') > 0 || process.env['PLUS'] == 'true')
     // load const and dico files
-const dico = consts.loadDico() //navigator.language.slice(0, 2))
-//console.log('dico', dico, consts)
+const dico = consts.loadDico() // navigator.language.slice(0, 2))
+// console.log('dico', dico, consts)
 
 const dialog = require('./dialog.js')
-
-
 const AppMenu = require('./menus.js')
 const mainMenu = new AppMenu()
 
-/*----------- SEARCH ACTION --------------*/
+/* ----------- SEARCH ACTION -------------- */
 
 /*
  *   send message get logs to (server)
  *   inputs : main form
  */
 document.getElementById('send-btn').addEventListener('click', () => {
-    event.preventDefault();
+    event.preventDefault()
     ipcRenderer.send(consts.events.JOURNALCTL, {
         'search': document.getElementById('search').value,
         'type': document.getElementById('searchtype').value,
@@ -52,7 +43,7 @@ document.getElementById('send-btn').addEventListener('click', () => {
  */
 ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
 
-    $('#content').prepend(`<pre>` + /*${response.txt}+*/ `</pre><h4>${response.error}</h4>`)
+    $('#content').prepend(`<pre>` + /* ${response.txt}+*/ `</pre><h4>${response.error}</h4>`)
     $('#commandbash').html(response.bash)
     $('#logs').text('')
 
@@ -63,8 +54,8 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
         response = null
         if (items.length > 5) {
             new Notification(`${dico.app.message}`, {
-                body: `${items.length} ${dico.app.message}.`,
-                icon: __dirname + '/img/icon.png'
+                'body': `${items.length} ${dico.app.message}.`,
+                'icon': __dirname + '../../assets/img/icon.png'
             })
         }
     } catch (e) {
@@ -73,30 +64,30 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
 
     // show messages
     console.log(items.length, ' items.length')
-    items.forEach((item, key) => {
+    items.forEach((item) => {
         delete item.__CURSOR
         item = new MessageItem(item, dico)
         $('#logs').append(item.render())
     })
 
     document.querySelectorAll('span.unit').forEach((el) => {
-        el.addEventListener('click', function(event) {
+        el.addEventListener('click', (event) => {
             let unit = event.srcElement.getAttribute('data-unit')
             ipcRenderer.send(consts.events.CAT_UNIT, unit)
         }, false)
     })
 
     document.querySelectorAll('span.executable').forEach((el) => {
-        el.addEventListener('click', function(event) {
+        el.addEventListener('click', (event) => {
             ipcRenderer.send(consts.events.PACMAN_QO, {
-                lang: navigator.language.slice(0, 2),
-                exe: event.srcElement.textContent
+                'lang': navigator.language.slice(0, 2),
+                'exe': event.srcElement.textContent
             })
         }, false)
     })
 
     document.querySelectorAll('span.time').forEach((el) => {
-        el.addEventListener('click', function(event) {
+        el.addEventListener('click', (event) => {
             let logtime = event.srcElement.textContent
             let response = event.srcElement.parentNode.querySelector('.cache').textContent
             let item = JSON.parse(response)
@@ -111,7 +102,7 @@ ipcRenderer.on(consts.events.JOURNALCTL_REPLY, (event, response) => {
     })
 })
 
-/*----------- ACTIONS MENU --------------*/
+/* ----------- ACTIONS MENU -------------- */
 
 /*
  *   dialog systemctl
@@ -132,43 +123,29 @@ ipcRenderer.on(consts.events.CAT_UNIT_REPLY, (event, response) => {
     dialog.title = dico.html.unit
     dialog.body = `${response.txt}<hr /><h4>${dico.app.details}</h4><hr />${response.detail}`
     dialog.show()
-        /*dialog.showMessageBox({
+
+        /* dialog.showMessageBox({
                     "type": "info",
                     "buttons": ["ok"],
                     "title": "systemd logs",
                     "message": "systemctl cat: "+response
-        });*/
+        }); */
 })
 
-ipcRenderer.on(consts.events.PLOT_REPLY, (event, src) => {
-    $('#dialog .modal-dialog').addClass('modal-lg')
-    $('#dialog .modal-title').html('systemd-analyze plot')
-    document.querySelector('#dialog .modal-body').innerHTML = `
-        <div id="scroll" class="dragscroll" style="width:100%; height:${$(window).height()-150}px; overflow:scroll;">
-        <img src="${src}" style="width:2000px;">
-        </div>
-    `
-    dragscroll.reset()
-    $('#dialog').modal('show')
+ipcRenderer.on(require('../actions/plotboot').MSG, (event, src) => {
+    let boot = require('../actions/plotboot')
+    boot.toHtml(src)
+    boot.showDialogModal(dialog)
 })
 
 /*
  *   Dialog: active units
  *   input: response.units object
  */
-ipcRenderer.on(consts.events.LIST_RUN_UNITS_REPLY, (event, response) => {
-    let html = ''
-    for (let key in response.units) {
-        html += `<i class="fa fa-info-circle catunit" aria-hidden="true" data-unit="${key}"></i>
-                <span class="text-info">${key}</span> = ${response.units[key]}<br />`
-    }
-    if (response.displayManager) {
-        html += `<br /><i class="text-muted">display-manager.service == ${response.displayManager}</i>`
-    }
-
-    dialog.title = dico.logs.active_units
-    dialog.body = html
-    dialog.show()
+ipcRenderer.on(require('../actions/units').MSG, (event, response) => {
+    let units = require('../actions/units')
+    units.toHtml(response)
+    units.showDialogModal(dialog)
 })
 
 /*
@@ -176,10 +153,10 @@ ipcRenderer.on(consts.events.LIST_RUN_UNITS_REPLY, (event, response) => {
  *           pacman -Ql
  *           man -k
  */
-function showDialogPacmanInfo(event, response) {
+function showDialogPacmanInfo (event, response) {
     response.qi = response.qi.replace(/^(\w.*?):/gm, '<span class="text-info">$1</span>=')
 
-    function setLink(link) {
+    function setLink (link) {
         let ret = (link.charAt(link.length - 1) == "\n") ? "\n" : ''
         let linkc = link.trim()
         link = linkc
@@ -192,7 +169,7 @@ function showDialogPacmanInfo(event, response) {
         return ` <a href="pacman://ql/${link}" class="getQI">${link}</a>${plus}&nbsp;&nbsp; ${ret}`
     }
 
-    response.links.forEach(function(value) {
+    response.links.forEach((value) => {
         response.qi = response.qi.replace(new RegExp(` (${value})[ |\n]`, 'g'), setLink)
     })
     response.qi = response.qi.replace(
@@ -202,17 +179,13 @@ function showDialogPacmanInfo(event, response) {
     response.qi = response.qi.replace(/\n/g, '<br />')
 
     response.ql = response.ql.replace(/^(\/usr\/bin\/\w.*)/gm, '<span class="text-info">$1</span>')
-    response.ql = response.ql.replace(/^(\/usr\/share\/doc.*index\.html$)/gm, '<span class="text-info"><a href="$1" target="web" class="fa fa-external-link">$1</a></span>')
+    response.ql = response.ql.replace(/^(\/usr\/share\/doc.*index\.html$)/gm, '<span class="text-info"><a href="file://$1" target="web" class="fa fa-external-link">$1</a></span>')
     response.ql = response.ql.replace(/^(\/etc\/\w.*)/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/(\.desktop)$/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/\n/g, '<br />')
 
-    try {
-        response.mans = response.mans.replace(/^(.*)\([\d|\)]/gm, '<a class="fa fa-info-circle man" aria-hidden="true" href="#"> $1</a> (')
-        response.mans = response.mans.replace(/\n/g, '<br />')
-    } catch (e) {;
-    }
-
+    response.mans = response.mans.replace(/^(.*)\([\d|\)]/gm, '<a class="fa fa-info-circle man" aria-hidden="true" href="#"> $1</a> (')
+    response.mans = response.mans.replace(/\n/g, '<br />')
 
     dialog.title = `${response.caption}, ${response.unit}`
     dialog.body = `
@@ -251,7 +224,7 @@ function showDialogPacmanInfo(event, response) {
 
     document.querySelectorAll('#man-search-form button').forEach((el) => {
         el.addEventListener('click', (event) => {
-            event.preventDefault();
+            event.preventDefault()
             ipcRenderer.send(consts.events.MAN_SEARCH, document.querySelector('#man-search-form input').value)
         }, false)
     })
@@ -264,7 +237,7 @@ function showDialogPacmanInfo(event, response) {
  *          response.comm string
  */
 ipcRenderer.on(consts.events.JOURNAL_GET_EXES_REPLY, (event, response) => {
-    dialog.title='search input'
+    dialog.title = 'search input'
     dialog.body = `
         <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#units" aria-controls="units" role="tab" data-toggle="tab">${dico.html.type.unit}</a></li>
@@ -300,7 +273,7 @@ ipcRenderer.on(consts.events.PACMAN_QI_REPLY, (event, response) => {
 ipcRenderer.on(consts.events.CAT_MAN_REPLY, (event, response) => {
     response.txt = response.txt.replace(/^#(.*)[<br>|<\/p>]/gm, '<i class="text-muted">#$1</i>' + '<br>')
 
-    function setLink(link) {
+    function setLink (link) {
         // links to man
         let linkc = link.trim()
         link = linkc
@@ -314,7 +287,7 @@ ipcRenderer.on(consts.events.CAT_MAN_REPLY, (event, response) => {
         return `<a href="#" class="man fa fa-info-circle"> ${link}</a>${plus} `
     }
 
-    function setLinkhtml(link) {
+    function setLinkhtml (link) {
         // links to http
         let linkc = link.trim()
         link = linkc
@@ -341,7 +314,7 @@ ipcRenderer.on(consts.events.CAT_MAN_REPLY, (event, response) => {
 /*
  *   show dialog find string in man
  */
-function showDialogMan(response) {
+function showDialogMan (response) {
     response.txt = response.txt.replace(/^(.*)\([\d|\)]/gm, '<a class="fa fa-info-circle man" aria-hidden="true" href="#"> $1</a> (')
     response.txt = response.txt.replace(/\n/g, '<br />')
 
@@ -364,7 +337,7 @@ function showDialogMan(response) {
 
     document.querySelectorAll('#man-search-form button').forEach((el) => {
         el.addEventListener('click', (event) => {
-            event.preventDefault();
+            event.preventDefault()
             ipcRenderer.send(consts.events.MAN_SEARCH, document.querySelector('#man-search-form input').value)
         }, false)
     })
@@ -380,7 +353,6 @@ ipcRenderer.on(consts.events.MAN_SEARCH_REPLY, (event, response) => {
  */
 ipcRenderer.on(consts.events.BASH_DF_REPLY, (event, response) => {
     dialog.title = 'df -h / lsblk'
-    let line
     let html = `<div class="row">
                 <span class="col-xs-3 df-source"></span>
                 <span class="col-xs-1 df-fstype">fs&nbsp;type</span>
@@ -407,7 +379,7 @@ ipcRenderer.on(consts.events.BASH_DF_REPLY, (event, response) => {
         html2 += `<div class="row">
                 <span class="col-xs-4 df-source">${line.name}</span>
                 <span class="col-xs-1 df-size">${line.size}</span>
-                <span class="col-xs-3 col-xs-offset-3 df-mountpoint">${(line.mountpoint)? line.mountpoint: '&nbsp;'}</span>
+                <span class="col-xs-3 col-xs-offset-3 df-mountpoint">${(line.mountpoint) ? line.mountpoint : '&nbsp;'}</span>
             </div>`
     })
     dialog.body = `<div class="df">${html}</div>
@@ -416,8 +388,8 @@ ipcRenderer.on(consts.events.BASH_DF_REPLY, (event, response) => {
     dialog.show()
 })
 
-function showAbout() {
-    let env = (process.env['npm_lifecycle_event'] == 'start') ? `process.env:<pre>${JSON.stringify(process.env).replace(/,/g,"<br>")}</pre>` : ''
+function showAbout () {
+    let env = (process.env['npm_lifecycle_event'] == 'start') ? `process.env:<pre>${JSON.stringify(process.env).replace(/,/g, "<br>")}</pre>` : ''
 
     dialog.title = consts.packageInfos.name
     dialog.body = `
@@ -430,8 +402,8 @@ function showAbout() {
             By <em class="text-info">${consts.packageInfos.author.name}</em>
             <a href="https://forum.manjaro.org/users/papajoke"><img src="https://forum.manjaro.org/user_avatar/forum.manjaro.org/papajoke/48/38_1.png" alt="papajoke"/></a>
             <hr />
-            <pre>Memory used: ${Math.round(process.getProcessMemoryInfo().workingSetSize /1024)} Mo</pre>
-            <pre>Total memory: ${Math.round(process.getSystemMemoryInfo().total /1024)} Mo</pre>
+            <pre>Memory used: ${Math.round(process.getProcessMemoryInfo().workingSetSize / 1024)} Mo</pre>
+            <pre>Total memory: ${Math.round(process.getSystemMemoryInfo().total / 1024)} Mo</pre>
             <hr />
             <div class="center">
 		        <div class="release"></div>
@@ -445,9 +417,9 @@ function showAbout() {
     setInfos()
 }
 
-/*----------- GENERAL HTML --------------*/
+/* ----------- GENERAL HTML -------------- */
 
-function setInfos() {
+function setInfos () {
     ipcRenderer.send(consts.events.RELEASE)
     ipcRenderer.send(consts.events.UNAME)
     document.querySelectorAll('.nodeinfos').forEach((el) => {
@@ -458,28 +430,28 @@ function setInfos() {
     })
 }
 
-window.addEventListener('load', (e) => {
+window.addEventListener('load', () => {
     dialog.init()
     setInfos()
     ipcRenderer.send(consts.events.JOURNAL_GET_BOOTS)
 
     document.getElementById('search-exe').addEventListener('click', (event) => {
-        event.preventDefault();
+        event.preventDefault()
         ipcRenderer.send(consts.events.JOURNAL_GET_EXES)
     }, false)
 
-    document.getElementById('search').addEventListener('blur', (event) => {
-        if (document.getElementById('search').value.slice(0,1)=='/') {
+    document.getElementById('search').addEventListener('blur', () => {
+        if (document.getElementById('search').value.slice(0, 1) == '/') {
             document.getElementById('searchtype').selectedIndex = 1
         }
     }, false)
 })
 
 ipcRenderer.on(consts.events.JOURNAL_GET_BOOTS_REPLY, (event, response) => {
-    let selected='selected'
+    let selected = 'selected'
     response.items.forEach((item) => {
-        $('#boot').append(`<option ${selected} value="${item.id}">${item.date} &nbsp;&nbsp; ${item.time.slice(0,-3)} &nbsp;&nbsp; ${item.day}</option>`)
-        selected=''
+        $('#boot').append(`<option ${selected} value="${item.id}">${item.date} &nbsp;&nbsp; ${item.time.slice(0, -3)} &nbsp;&nbsp; ${item.day}</option>`)
+        selected = ''
     })
 })
 
@@ -497,11 +469,11 @@ ipcRenderer.on(consts.events.RELEASE_REPLY, (event, response) => {
 
 
 
-function applyTheme(theme = 'superhero') {
+function applyTheme (theme = 'superhero') {
     $('head').prepend('<link href="./assets/css/themes/' + theme + '/bootstrap.css" type="text/css" rel="stylesheet"/>')
     $(`link[href*="themes"]:not(link[href*="${theme}"])`).remove()
     ipcRenderer.send('THEME_CHANGE', theme)
-        //require('electron').remote.app.mainWindow.userConfig.setItem('theme',theme)
+        // require('electron').remote.app.mainWindow.userConfig.setItem('theme',theme)
 }
 
 /*
@@ -510,24 +482,24 @@ function applyTheme(theme = 'superhero') {
 ipcRenderer.on('SET_THEME', (event, theme) => {
     if (!theme) return false
     applyTheme(theme)
-    mainMenu.update({ 'theme' : theme })
+    mainMenu.update({ 'theme': theme })
 })
 
 /*
  *  receve messages from application menu
  */
 mainMenu.on('action', (event, param) => {
-    switch(event) {
-        case 'SET_THEME' :
-            return applyTheme(param)
-            //mainMenu.update({ 'theme' : param })
-        case 'MAN' :
-            return showDialogMan({
-                caption: '',
-                txt: ''
-            })
-        case 'ABOUT' :
-            return showAbout()
+    switch (event) {
+    case 'SET_THEME' :
+        return applyTheme(param)
+            // mainMenu.update({ 'theme' : param })
+    case 'MAN' :
+        return showDialogMan({
+            'caption': '',
+            'txt': ''
+        })
+    case 'ABOUT' :
+        return showAbout()
     }
 })
 
@@ -536,12 +508,12 @@ mainMenu.on('action', (event, param) => {
  * traductions
  * replace block in main.js#createWindow() break
  */
-$('option, span, label').text(function(i, value) {
-    var ok = value.match(/::(.*)::/)
-    if (ok != null) {
+$('option, span, label').text(function (i, value) {
+    var matchs = value.match(/::(.*)::/)
+    if (matchs != null) {
         try {
-            let match = ok[0].slice(2, -2)
-            let newvalue = eval(`dico.${match}`)
+            var match = matchs[0].slice(2, -2)
+            var newvalue = eval(`dico.${match}`)
             $(this).text(value.replace(/::(.*)::/, newvalue))
         } catch (e) {
             console.log('error replace ', match, 'by', newvalue, e)
@@ -550,13 +522,13 @@ $('option, span, label').text(function(i, value) {
 })
 
 
-$(document).on('click', 'a[href^="http"]', function(event) {
-    event.preventDefault();
-    shell.openExternal(this.href);
-});
+$(document).on('click', 'a[href^="http"]', (event) => {
+    event.preventDefault()
+    shell.openExternal(event.target.href)
+})
 
-$(document).on('click', 'a[target^="web"]', function(event) {
+$(document).on('click', 'a[target^="web"]', (event) => {
     // for html in /usr/share/doc
-    event.preventDefault();
-    shell.openExternal(this.href);
-});
+    event.preventDefault()
+    shell.openExternal(event.target.href)
+})

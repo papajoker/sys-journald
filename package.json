@@ -12,7 +12,6 @@
     "dist": "build",
     "appimage": "build --linux Appimage --x64 && rm -r ./dist/linux && cd dist; ./pkgbuild.js && makepkg -scfi -p PKGBUILD-APPIMAGE",
     "pacman": "build --linux pacman --x64 && rm -r ./dist/linux && cd dist; ./pkgbuild.js && makepkg -scfi"
-    
   },
   "repository": {
     "type": "git",
@@ -36,7 +35,7 @@
   "build": {
     "appId": "papajoker.systemd.logs",
     "app-category-type": "system",
-    "productName":"sys-journald",
-    "compression":"maximum"
+    "productName": "sys-journald",
+    "compression": "maximum"
   }
 }

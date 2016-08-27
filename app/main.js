@@ -1,9 +1,7 @@
-'use strict'
 
-const electron = require('electron')
+// const electron = require('electron')
 const {
     app,
-    Tray,
     ipcMain,
     BrowserWindow,
     protocol
@@ -14,42 +12,37 @@ const exec = require('child_process').exec
 const fs = require('fs')
 
 const consts = require('./consts.js')
-const dico = consts.loadDico()
 const UserConfig = require('./userconfig.js')
-const plus= ( process.argv.indexOf('--plus')>0 || process.env['PLUS']=='true' )
-
-
-const path = require('path')
+// const plus = (process.argv.indexOf('--plus') > 0 || process.env['PLUS'] == 'true')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let tray = null
 
 require('./app.js')
 
 protocol.registerStandardSchemes(['pacman'])
 
 
-function createWindow() {
+function createWindow () {
 
     const userconfig = new UserConfig()
     userconfig.load()
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: userconfig.getItem('w'),
-        height: userconfig.getItem('h'),
-        minWidth: 450,
-        minHeight: 470,
-        show: false,
-        icon: __dirname + '/../assets/img/icon.png',
-        title: consts.name,
-        webPreferences: {
-            zoomFactor: 1,
-            defaultFontSize: 16,
-            webSecurity: false,
-            webaudio: false
+        'width': userconfig.getItem('w'),
+        'height': userconfig.getItem('h'),
+        'minWidth': 450,
+        'minHeight': 470,
+        'show': false,
+        'icon': __dirname + '/../assets/img/icon.png',
+        'title': consts.name,
+        'webPreferences': {
+            'zoomFactor': 1,
+            'defaultFontSize': 16,
+            'webSecurity': false,
+            'webaudio': false
         }
     })
     app.mainWindow = mainWindow
@@ -77,7 +70,7 @@ function createWindow() {
         })
     })*/
     mainWindow.loadURL(`file://${__dirname}/../model.htm`)
-    //mainWindow.openDevTools()
+    // mainWindow.openDevTools()
 
 
     // Emitted when the window is closed.
@@ -92,11 +85,11 @@ function createWindow() {
         mainWindow.userconfig.setItem('w', app.mainWindow.getSize()[0])
         mainWindow.userconfig.setItem('h', app.mainWindow.getSize()[1])
         mainWindow.userconfig.save()
-        console.log('usrConfig',mainWindow.userconfig)
+        console.log('usrConfig', mainWindow.userconfig)
     })
 
     mainWindow.webContents.on('dom-ready', () => {
-        mainWindow.webContents.send('SET_THEME',mainWindow.userconfig.getItem('theme'));
+        mainWindow.webContents.send('SET_THEME', mainWindow.userconfig.getItem('theme'))
         mainWindow.show()
     })
 
@@ -106,17 +99,17 @@ function createWindow() {
 
     // tests
     protocol.registerStringProtocol('pacman', (request, callback) => {
-        console.log('pacman://',request)
-        let req= { exe:'sudo', lang:'fr' }
-        let response= require('./app.js').runPacman(null,req, (response)=>{
-            console.log('pacman:// response',response)
-            let html=`<!DOCTYPE html><html>
+        console.log('pacman://', request)
+        let req = { 'exe': 'sudo', 'lang': 'fr' }
+        require('./app.js').runPacman(null, req, (response)=>{
+            console.log('pacman:// response', response)
+            let html = `<!DOCTYPE html><html>
                 <h3>pacman://</h3>
                 <h4>${request.url}</h4>
                 ${response.qi}<hr>
                 ${response.links.join('<br />')}
                 </html>`
-            callback({data: html, mimeType:'text/html'})
+            callback({'data': html, 'mimeType': 'text/html'})
         })
     }, (error) => {
         if (error) console.error('Failed to register protocol')
@@ -131,7 +124,7 @@ function createWindow() {
 app.on('ready', createWindow) // original
 
 // Quit when all windows are closed.
-app.on('window-all-closed', function() {
+app.on('window-all-closed', () => {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
@@ -143,7 +136,7 @@ app.on('window-all-closed', function() {
     }
 })
 
-app.on('activate', function() {
+app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
@@ -151,35 +144,31 @@ app.on('activate', function() {
     }
 })
 
-app.on('open-url', function (ev, url) {
-    //console.log('open-url',url)
-});
-
-ipcMain.on('GO_HOME', (event)=>{
+ipcMain.on('GO_HOME', ()=>{
     mainWindow.loadURL(`file://${__dirname}/../model.htm`)
-    mainWindow.webContents.send('SET_THEME',mainWindow.userconfig.getItem('theme'));
+    mainWindow.webContents.send('SET_THEME', mainWindow.userconfig.getItem('theme'))
 })
 
-ipcMain.on('APP_QUIT', (event) => {
+ipcMain.on('APP_QUIT', () => {
     console.log('APP_QUIT')
     app.quit()
 })
 
-ipcMain.on('DEV_OPEN', (event) => {
+ipcMain.on('DEV_OPEN', () => {
     mainWindow.toggleDevTools()
 })
 
-ipcMain.on('ZOOM_RESET', (event) => {
+ipcMain.on('ZOOM_RESET', () => {
     mainWindow.webContents.setZoomLevel(0)
 })
 
-ipcMain.on('ZOOM_IN', (event) => {
+ipcMain.on('ZOOM_IN', () => {
     console.log(require.resolve('electron'))
     mainWindow.zlevel -= 1
     mainWindow.webContents.setZoomLevel(mainWindow.zlevel)
 })
 
-ipcMain.on('ZOOM_OUT', (event) => {
+ipcMain.on('ZOOM_OUT', () => {
     console.log(require.resolve('electron'))
     mainWindow.zlevel += 1
     mainWindow.webContents.setZoomLevel(mainWindow.zlevel)

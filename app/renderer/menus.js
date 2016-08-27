@@ -1,4 +1,4 @@
-/*----------- APP MENU --------------*/
+/* ----------- APP MENU -------------- */
 
 const {
     remote,
@@ -9,50 +9,50 @@ const {
     MenuItem
 } = remote
 const fs = require('fs')
-const path = require('path');
-const EventEmitter = require('events').EventEmitter;
+const path = require('path')
+const EventEmitter = require('events').EventEmitter
 
-const consts = require('../app/consts.js')
+const consts = require('../consts.js')
 const plus = (process.argv.indexOf('--plus') > 0 || process.env['PLUS'] == 'true')
-const dico = consts.loadDico() //navigator.language.slice(0, 2))
+const dico = consts.loadDico() // navigator.language.slice(0, 2))
 
 
 
 class AppMenu extends EventEmitter {
 
-    constructor() {
-        super();
-        Menu.setApplicationMenu( remote.Menu.buildFromTemplate(
+    constructor () {
+        super()
+        Menu.setApplicationMenu (remote.Menu.buildFromTemplate(
             this.setTemplate()
-        ) )
-        this.themeitems={}
+        ))
+        this.themeitems = {}
     }
 
     setThemes () {
         let self = this
-        let themeMenu = new Menu();
-        fs.readdir(path.join(__dirname,'/css/themes'), function (err, files) {
+        let themeMenu = new Menu()
+        fs.readdir(path.join(__dirname, '../../assets/css/themes'), function (err, files) {
             files.forEach(function (file) {
-                fs.stat(path.join(__dirname,'/css/themes/',file), function (err, stats) {
-                    if (err) throw err;
+                fs.stat(path.join(__dirname, '../../assets/css/themes/', file), function (err, stats) {
+                    if (err) throw err
                     if (stats.isDirectory()) {
-                        themeMenu.append(new MenuItem({ 
-                            type: 'radio', 
+                        themeMenu.append(new MenuItem({
+                            type: 'radio',
                             label: file,
                             id: `mnu_${file}`,
                             click: () => {
-                                self.emit('action', 'SET_THEME', file);
+                                self.emit('action', 'SET_THEME', file)
                             }
-                        }));
+                        }))
                     }
                 })
             })
         })
-        this.themeitems=themeMenu
+        this.themeitems = themeMenu
         return themeMenu
     }
 
-    setTemplate() {
+    setTemplate () {
         let self = this
         return [{
             label: dico.menu.file,
@@ -72,7 +72,7 @@ class AppMenu extends EventEmitter {
                 label: 'ma&n',
                 accelerator: 'CmdOrCtrl+N',
                 click: () => {
-                    self.emit('action', 'MAN');
+                    self.emit('action', 'MAN')
                 }
             }, {
                 label: 'Partitions &df',
@@ -101,8 +101,8 @@ class AppMenu extends EventEmitter {
             label: dico.menu.view,
             submenu: [{
                 label: 'Themes',
-                submenu : this.setThemes()
-            },{
+                submenu: this.setThemes()
+            }, {
                 type: 'separator'
             }, {
                 label: 'Zoom',
@@ -146,7 +146,7 @@ class AppMenu extends EventEmitter {
             }, {
                 label: 'Reload',
                 accelerator: 'F5',
-                click(item, focusedWindow) {
+                click (item, focusedWindow) {
                     if (focusedWindow) focusedWindow.reload()
                 },
                 visible: plus,
@@ -155,7 +155,7 @@ class AppMenu extends EventEmitter {
                 label: 'Home',
                 visible: plus,
                 accelerator: 'F2',
-                click() {
+                click () {
                     ipcRenderer.send('GO_HOME')
                 }
             }]
@@ -171,42 +171,42 @@ class AppMenu extends EventEmitter {
                 type: 'separator'
             }, {
                 label: 'About',
-                click() {
+                click () {
                     self.emit('action', 'ABOUT')
                 }
             }]
         }]
     }
 
-    update(options) {
+    update (options) {
 
-        function changeTheme(menu,mnuid) {
+        function changeTheme (menu, mnuid) {
             menu.items.forEach((item) => {
-                if (item.label=='Themes'){
-                    changeTheme(item.submenu,mnuid);
+                if (item.label == 'Themes') {
+                    changeTheme(item.submenu, mnuid)
                     return
                 }
                 if (item.submenu) {
-                    changeTheme(item.submenu,mnuid);
+                    changeTheme(item.submenu, mnuid)
                 }
                 else if (item.id == mnuid) {
                     item.checked = true
                     return true
-                } 
-            });
+                }
+            })
             return false
         }
 
-        //console.log('debut update menu',options.theme)
-        if (options.theme){
+        // console.log('debut update menu',options.theme)
+        if (options.theme) {
             let menu = Menu.getApplicationMenu()
-            changeTheme(menu,'mnu_'+options.theme)
-         }
+            changeTheme(menu, 'mnu_' + options.theme)
+        }
     }
 
 }
 
-module.exports = AppMenu;
+module.exports = AppMenu
 
 /*
 const menu = new Menu()

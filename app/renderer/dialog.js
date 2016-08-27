@@ -3,15 +3,12 @@
  */
 
 const ipcRenderer = require('electron').ipcRenderer
-const consts = require('../app/consts.js')
-
-const id = 'dialog'
-const tag = '.history'
+const consts = require('../consts.js')
 
 var dialog = null
 
 class Dialog {
-    constructor() {
+    constructor () {
         this.title = ''
         this.isHistory = false
         this.body = ''
@@ -19,13 +16,13 @@ class Dialog {
         this._save = []
     }
 
-    set large(big = false) {
+    set large (big = false) {
         this._large = big
         $('#dialog .modal-dialog').removeClass('modal-lg')
         this._large && $('#dialog .modal-dialog').addClass('modal-lg')
     }
 
-    show(attach = null) {
+    show (attach = null) {
         // save in history
         if ($('#dialog .modal-title').html() != '') {
             this._save.push({
@@ -43,10 +40,10 @@ class Dialog {
         $('#dialog').modal('show')
         $('#dialog').animate({
             scrollTop: 0
-        }, 200);
+        }, 200)
     }
 
-    back() {
+    back () {
         if (this._save.length < 1) return false
         let history = this._save.pop()
         $('#dialog .modal-title').html(history.title)
@@ -57,21 +54,21 @@ class Dialog {
         $('#dialog').modal('show')
     }
 
-    setBack() {
+    setBack () {
         this.isHistory = (this._save.length > 0)
         $('#dialog .back').css('visibility', (this.isHistory) ? 'inherit' : 'hidden')
         $('#dialog .back').html(this._save.length)
     }
 
-    setAttach() {
+    setAttach () {
         document.querySelectorAll('#dialog a.man').forEach((el) => {
-            el.addEventListener('click', function(event) {
+            el.addEventListener('click', (event) => {
                 ipcRenderer.send(consts.events.CAT_MAN, event.srcElement.textContent)
             }, false)
         })
         document.querySelectorAll('#dialog a.getQI').forEach((el) => {
-            el.addEventListener('click', function(event) {
-                event.preventDefault();
+            el.addEventListener('click', (event) => {
+                event.preventDefault()
                 ipcRenderer.send(consts.events.PACMAN_QI, {
                     lang: navigator.language.slice(0, 2),
                     unit: event.srcElement.textContent
@@ -79,14 +76,14 @@ class Dialog {
             }, false)
         })
         document.querySelectorAll('#dialog i.catunit').forEach((el) => {
-            el.addEventListener('click', function(event) {
+            el.addEventListener('click', (event) => {
                 ipcRenderer.send(consts.events.CAT_UNIT, event.srcElement.getAttribute('data-unit'))
             }, false)
         })
 
     }
 
-    clear() {
+    clear () {
         this._save = []
         this.title = ''
         this.body = ''
@@ -94,7 +91,7 @@ class Dialog {
         $('#dialog .modal-body').html('')
     }
 
-    init() {
+    init () {
         $('body').append(`
     <!-- Modal -->
 	<div id="dialog" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -113,15 +110,15 @@ class Dialog {
 	 </div>
     </div>
         `)
-        $('#dialog').on('hidden.bs.modal', function(e) {
+        $('#dialog').on('hidden.bs.modal', function () {
             dialog.clear()
-                //$('#dialog .modal-dialog').removeClass('modal-lg')
+                // $('#dialog .modal-dialog').removeClass('modal-lg')
         })
         $('.modal').on('shown.bs.modal', function () {
-            $(this).find('input:first').focus();
+            $(this).find('input:first').focus()
         })
         document.querySelectorAll('#dialog .back').forEach((el) => {
-            el.addEventListener('click', function(event) {
+            el.addEventListener('click', () => {
                 dialog.back()
             }, false)
         })
