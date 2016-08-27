@@ -14,7 +14,8 @@ module.exports = class UserConfig {
             w: consts.ui.windowDefaultWidth,
             h: consts.ui.windowDefaultHeight,
             theme: 'flatly',
-            maxlogs: 1400
+            maxlogs: consts.packageInfos.maxitems,
+            notify: consts.packageInfos.notify
         }
     }
 
@@ -30,8 +31,10 @@ module.exports = class UserConfig {
         try {
             let data = fs.readFileSync(this.path, 'utf8')
             this.data = JSON.parse(data)
-            if (!this.data.maxlogs) this.data.maxlogs = 1400
+            if (!this.data.maxlogs) this.data.maxlogs = consts.packageInfos.maxitems
+            if (!this.data.notify) this.data.maxlogs = consts.packageInfos.notify
             consts.packageInfos.maxitems = this.data.maxlogs
+            consts.packageInfos.notify = this.data.notify
             console.log('user loaded', data)
             return true
         } catch (e) {
