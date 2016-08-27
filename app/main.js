@@ -1,5 +1,5 @@
 
-// const electron = require('electron')
+const electron = require('electron')
 const {
     app,
     ipcMain,
@@ -42,7 +42,8 @@ function createWindow () {
             'zoomFactor': 1,
             'defaultFontSize': 16,
             'webSecurity': false,
-            'webaudio': false
+            'webaudio': false,
+            'disableBlinkFeatures': 'AudioOutputDevices,WebVR'
         }
     })
     app.mainWindow = mainWindow
@@ -178,3 +179,48 @@ ipcMain.on('THEME_CHANGE', (event, newtheme) => {
     mainWindow.userconfig.setItem('theme', newtheme)
 })
 
+/* --------------- NEW WINDOW ---------------- */
+
+var editWindow = null
+
+function createNewWindow (options) {
+    if (editWindow) {
+        editWindow.destroy()
+        editWindow = null
+    }
+
+    editWindow = new BrowserWindow ({
+        parent: mainWindow,
+        modal: options.modal,
+        show: false,
+        title: options.file,
+        width: 200 + (electron.screen.getPrimaryDisplay().size.width / 2),
+        height: electron.screen.getPrimaryDisplay().size.height / 2
+    })
+    editWindow.file = options.file
+    editWindow.mainTheme = mainWindow.userconfig.getItem('theme')
+    editWindow.setMenu(null)
+    if (options.debug) editWindow.openDevTools()
+    console.log('open file', options.file)
+    editWindow.loadURL(`file://${app.getAppPath()}/${options.model}`)
+
+    editWindow.once('ready-to-show', () => {
+        editWindow.show()
+    })
+
+    editWindow.on('close', () => {
+        editWindow = null
+    })
+
+    editWindow.on('app-command', (e, cmd) => {
+        console.log('app-command', cmd)
+        // Navigate the window back when the user hits their mouse back button
+        if (cmd === 'browser-backward' && editWindow.webContents.canGoBack()) {
+            editWindow.webContents.goBack()
+        }
+    })
+}
+
+ipcMain.on(consts.events.WINDOW_CREATE, (event, options) => {
+    createNewWindow(options)
+})

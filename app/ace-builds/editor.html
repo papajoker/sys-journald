@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Edit</title>
+    <style type="text/css" media="screen">
+        body {
+            overflow: hidden;
+        }
+
+        #editor {
+            margin: 2.2em 0 0 0;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+    </style>
+    <link href="../../assets/css/font-awesome.css" rel="stylesheet" type="text/css" />
+    <script>
+        const {
+            remote
+        } = require('electron')
+        const fs = require('fs')
+        var path = require('path');
+        var sudo = require('sudo-prompt');
+        const theme = remote.getCurrentWindow().mainTheme
+        var file = remote.getCurrentWindow().file
+        var saveas = false
+
+        // load only text files
+        let mimetype=require('child_process').execSync(`file -bi ${file} 2>/dev/null`,{ encoding:'utf8'})+''
+        if ((mimetype.slice(0,4)!='text')) remote.getCurrentWindow().close();
+
+        document.write('<link href="../../assets/css/themes/' + theme + '/bootstrap.css" rel="stylesheet" type="text/css" />')
+    </script>
+
+</head>
+
+<body>
+    <div class="bar">
+        <button class="btn btn-default" href="#" id="save"><i class="fa fa-floppy-o"></i></button>
+        <button class="btn btn-default" style="float:right" href="#" id="close"><i class="fa fa-times-circle"></i></button>
+    </div>
+    <pre id="editor"></pre>
+
+    <script>
+        document.title = file
+        let data = ''
+        try {
+            data = fs.readFileSync(file, {
+                encoding: 'utf8'
+            })
+        } catch (e) {
+            remote.getCurrentWindow().close()
+        }
+        document.getElementById('editor').innerHTML = data
+    </script>
+    <script src="src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        const editor = ace.edit('editor');
+        editor.setFontSize('1.2em')
+        editor.session.setOption('useWorker', false);
+        editor.setTheme('ace/theme/twilight');
+        editor.setShowPrintMargin(false);
+
+        let name = path.basename(file)
+        let extension = path.extname(name)
+        //editor.session.setMode('ace/mode/plain_text');
+        switch (name) {
+            case 'yaourtrc':
+                editor.session.setMode('ace/mode/ini');
+                break
+            case 'profile':
+                editor.session.setMode('ace/mode/batchfile');
+                break
+        }
+        switch (extension) {
+            case '.js':
+                editor.session.setMode('ace/mode/javascript');
+                break
+            case '.zsh':
+            case '.sh':
+                editor.session.setMode('ace/mode/sh');
+                break
+            case '.pacnew':
+            case '.service':
+            case '.timer':
+            case '.target':
+            case '.conf':
+                editor.session.setMode('ace/mode/ini');
+                break
+            case '.htm':
+            case '.html':
+                editor.session.setMode('ace/mode/html');
+                break
+            case '.css':
+                editor.session.setMode('ace/mode/css');
+                break
+        }
+
+        editor.commands.addCommand({
+            name: 'saveFile',
+            bindKey: {
+                win: 'Ctrl-S',
+                sender: 'editor|cli'
+            },
+            exec: function(env, args, request) {
+                var evt = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                })
+                document.getElementById('save').dispatchEvent(evt)
+            }
+        });
+
+        document.getElementById('close').addEventListener('click', (event) => {
+            event.preventDefault()
+            remote.getCurrentWindow().close()
+        }, false)
+
+        function saveFile(filename) {
+            if (!filename) return false
+            fs.writeFile(filename, editor.getValue(), (err) => {
+                if (err) {
+                    // if 'permission denied'
+                    console.log('error', err)
+                    fs.writeFile('/tmp/sjd-sudo', editor.getValue(), (err) => {
+                        if (!err) {
+                            sudo.exec(`cp /tmp/sjd-sudo "${filename}"`, {
+                                    name: 'sys journald'
+                                },
+                                function(error, stdout, stderr) {
+                                    if (!error)
+                                        alert('ok')
+                                    else
+                                        alert('Error ' + stderr)
+                                });
+                        }
+                    })
+                }
+            })
+        }
+
+        document.getElementById('save').addEventListener('click', (event) => {
+            event.preventDefault()
+            if (saveas) remote.dialog.showSaveDialog({
+                defaultPath: file
+            }, (filename) => {
+                file = filename
+            })
+            saveFile(file)
+        }, false)
+    </script>
+
+</body>
+
+</html>

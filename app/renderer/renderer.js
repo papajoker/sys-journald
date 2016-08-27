@@ -135,7 +135,8 @@ ipcRenderer.on(consts.events.CAT_UNIT_REPLY, (event, response) => {
 ipcRenderer.on(require('../actions/plotboot').MSG, (event, src) => {
     let boot = require('../actions/plotboot')
     boot.toHtml(src)
-    boot.showDialogModal(dialog)
+    // boot.showDialogModal(dialog)
+    boot.showDialogWindow()
 })
 
 /*
@@ -180,6 +181,7 @@ function showDialogPacmanInfo (event, response) {
 
     response.ql = response.ql.replace(/^(\/usr\/bin\/\w.*)/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/^(\/usr\/share\/doc.*index\.html$)/gm, '<span class="text-info"><a href="file://$1" target="web" class="fa fa-external-link">$1</a></span>')
+    response.ql = response.ql.replace(/^(\/etc\/.*\.conf$)/gm, '<a target="edit" href="file://$1">$1</a>')
     response.ql = response.ql.replace(/^(\/etc\/\w.*)/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/(\.desktop)$/gm, '<span class="text-info">$1</span>')
     response.ql = response.ql.replace(/\n/g, '<br />')
@@ -531,4 +533,18 @@ $(document).on('click', 'a[target^="web"]', (event) => {
     // for html in /usr/share/doc
     event.preventDefault()
     shell.openExternal(event.target.href)
+})
+
+$(document).on('click', 'a[target^="edit"]', (event) => {
+    // open self editor
+    event.preventDefault()
+    let href = event.target.href
+    if (href.slice(0, 7) == 'file://') href = href.slice(7)
+    ipcRenderer.send(consts.events.WINDOW_CREATE, {
+        model: 'app/ace-builds/editor.html',
+        file: href,
+        debug: false,
+        modal: true,
+        readonly: true
+    })
 })
