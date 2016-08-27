@@ -45,7 +45,6 @@ module.exports = {
         if (response.displayManager) {
             this.html += `<br /><i class="text-muted">display-manager.service == ${response.displayManager}</i>`
         }
-        console.log('html', this.html)
         return this.html
     },
 
