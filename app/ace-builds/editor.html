@@ -21,19 +21,20 @@
     </style>
     <link href="../../assets/css/font-awesome.css" rel="stylesheet" type="text/css" />
     <script>
+        'use strict'
         const {
             remote
         } = require('electron')
         const fs = require('fs')
-        var path = require('path');
-        var sudo = require('sudo-prompt');
+        var path = require('path')
+        var sudo = require('sudo-prompt')
         const theme = remote.getCurrentWindow().mainTheme
         var file = remote.getCurrentWindow().file
         var saveas = false
 
         // load only text files
         let mimetype=require('child_process').execSync(`file -bi ${file} 2>/dev/null`,{ encoding:'utf8'})+''
-        if ((mimetype.slice(0,4)!='text')) remote.getCurrentWindow().close();
+        if ((mimetype.slice(0,4)!='text')) remote.getCurrentWindow().close()
 
         document.write('<link href="../../assets/css/themes/' + theme + '/bootstrap.css" rel="stylesheet" type="text/css" />')
     </script>

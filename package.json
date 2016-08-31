@@ -38,5 +38,8 @@
     "app-category-type": "system",
     "productName": "sys-journald",
     "compression": "maximum"
+  },
+  "dependencies": {
+    "sudo-prompt": "^6.2.0"
   }
 }
