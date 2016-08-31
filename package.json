@@ -30,8 +30,8 @@
   "url": "http://www.webstratege.fr",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron-packager": "^7.5.1",
-    "electron-prebuilt": "^1.3.0"
+    "electron-packager": "~7.7",
+    "electron-prebuilt": "~1.3"
   },
   "build": {
     "appId": "papajoker.systemd.logs",
